@@ -4,7 +4,7 @@ This is just my feeble attempt at setting up a Dockerfile build that generates a
 
 # Prerequisites
 
-- Docker ()
+- [Docker](https://docs.docker.com/desktop/)
 
 # Configure
 

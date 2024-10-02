@@ -1,0 +1,112 @@
+{
+    "rabbit_version":"_RABBITMQ_VERSION_",
+    "rabbitmq_version":"_RABBITMQ_VERSION_",
+    "product_name":"RabbitMQ",
+    "product_version":"_RABBITMQ_VERSION_",
+    "users": [
+        {
+            "name":"_RABBIT_MQ_SERVICE_USERNAME_",
+            "password_hash":"_SERVICE_ACCOUNT_PASSWORD_HASH_",
+            "hashing_algorithm":"rabbit_password_hashing_sha256",
+            "tags":[],
+            "limits":{}
+        },
+        {
+            "name":"_RABBIT_MQ_USER_USERNAME_",
+            "password_hash":"_RABBIT_MQ_USER_PASSWORD_HASH_",
+            "hashing_algorithm":"rabbit_password_hashing_sha256",
+            "tags":["administrator", "management", "policymaker", "monitoring", "management_agent", "management_agent_user"],
+            "limits":{}
+        }
+    ],
+    "vhosts":[
+        {
+            "name":"/",
+            "description":"Default virtual host",
+            "tags":[],
+            "metadata":{
+                "description":"Default virtual host",
+                "tags":[]
+                }
+        },
+        {
+            "name":"_SERVICE_NAME_",
+            "description":"_SERVICE_NAME_ virtual host",
+            "tags":[],
+            "metadata":{
+                "description":"_SERVICE_NAME_ virtual host",
+                "tags":[]
+                }
+        }
+    ],
+    "permissions":[
+        {
+            "user":"_RABBIT_MQ_USER_USERNAME_",
+            "vhost":"/",
+            "configure":".*",
+            "write":".*",
+            "read":".*"
+        },
+        {
+            "user":"_RABBIT_MQ_SERVICE_USERNAME_",
+            "vhost":"_SERVICE_NAME_",
+            "configure":"",
+            "write":".*",
+            "read":".*"
+        },
+        {
+            "user":"_RABBIT_MQ_USER_USERNAME_",
+            "vhost":"_SERVICE_NAME_",
+            "configure":".*",
+            "write":".*",
+            "read":".*"
+        }
+    ],
+    "topic_permissions":[],
+    "parameters":[],
+    "global_parameters":[
+    ],
+    "policies":[
+        {
+            "name": "expire_messages",
+            "vhost": "_SERVICE_NAME_",
+            "pattern": "^service_queue$",
+            "apply-to": "queues",
+            "definition": {
+                "message-ttl": 60000,
+                "max-length": 1000
+            },
+            "priority": 0
+        }
+    ],
+    "queues":[
+        {
+            "name": "_SERVICE_QUEUE_NAME_",
+            "vhost": "_SERVICE_NAME_",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        }
+    ],
+    "exchanges":[
+        {
+            "name":"_SERVICE_EXCHANGE_NAME_",
+            "vhost":"_SERVICE_NAME_",
+            "type":"direct",
+            "durable":true,
+            "auto_delete":false,
+            "internal":false,
+            "arguments":{}
+        }
+    ],
+    "bindings":[
+        {
+            "source":"_SERVICE_EXCHANGE_NAME_",
+            "vhost":"_SERVICE_NAME_",
+            "destination":"_SERVICE_QUEUE_NAME_",
+            "destination_type":"queue",
+            "routing_key":"_SERVICE_QUEUE_NAME_",
+            "arguments":{}
+        }
+    ]
+}

@@ -71,7 +71,7 @@
         {
             "name": "expire_messages",
             "vhost": "_SERVICE_NAME_",
-            "pattern": "^service_queue$",
+            "pattern": "^.*$",
             "apply-to": "queues",
             "definition": {
                 "message-ttl": 60000,

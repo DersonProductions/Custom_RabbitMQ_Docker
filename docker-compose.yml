@@ -24,12 +24,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
 services:
   rabbitmq:
     build:
       context: .
       dockerfile: Dockerfile
+      tags:
+        - rabbitmq:${TAG:-latest}
+    restart: always
     ports:
       - "5672:5672"
       - "15672:15672"

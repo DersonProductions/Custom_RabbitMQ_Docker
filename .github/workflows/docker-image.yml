@@ -8,7 +8,7 @@ on:
 jobs:
 
   build:
-
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read

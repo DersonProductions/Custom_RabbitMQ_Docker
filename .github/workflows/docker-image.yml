@@ -20,11 +20,6 @@ jobs:
         echo "IMAGE_NAME=rabbitmq" >> $GITHUB_ENV
         echo "TAG=$(echo ${{ github.ref }} | sed -n 's/refs\/tags\/v//p')" >> $GITHUB_ENV
         echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
-      # Get latest tag from the repository
-    - name: Get the latest tag and export to environment
-      id: get_tag
-      shell: bash
-      run: 
     - uses: actions/checkout@v4
     - name: Build the Docker image and push to GitHub Container Registry
       shell: bash

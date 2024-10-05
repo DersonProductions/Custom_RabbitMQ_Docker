@@ -32,9 +32,22 @@ services:
       tags:
         - rabbitmq:${TAG:-latest}
     restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15671:15671"
+      # - "25672:25672"
+      - "15674:15674"
+      - "15675:15675"
+      - "1883:1883"
+      - "8883:8883"
+      - "15692:15692"
+      - "15691:15691"
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
       - ./rabbitmq/log:/var/log/rabbitmq

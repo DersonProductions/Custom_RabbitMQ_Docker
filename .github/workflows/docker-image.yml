@@ -32,5 +32,6 @@ jobs:
     - name: Build the Docker image and push to GitHub Container Registry
       shell: bash
       run: |
-        docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-        docker push ghcr.io/${{ env.REPO_NAME }}:${{ env.TAG }}
+        docker build . --file Dockerfile --tag ghcr.io/${{ env.REPO_NAME }}:${{ env.IMAGE_NAME }}_${{ env.TAG }}
+        docker images
+        docker push ghcr.io/${{ env.REPO_NAME }}:${{ env.IMAGE_NAME }}_${{ env.TAG }}

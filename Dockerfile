@@ -85,6 +85,9 @@ COPY rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD rabbitmq-diagnostics -q ping || exit 1
 
+# Switch to the rabbitmq user
+USER rabbitmq
+
 # Start the RabbitMQ server
 CMD ["rabbitmq-server"]
  

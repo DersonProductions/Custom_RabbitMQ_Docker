@@ -54,7 +54,7 @@ jobs:
       run: |
         # Ensure Docker Scan is enabled
         docker scan --version
-        scan_output=$(docker scout cves ${{ env.REPO_NAME }}:${{ env.TAG }})
+        scan_output=$(docker scan ${{ env.REPO_NAME }}:${{ env.TAG }} --json)
         echo "$scan_output"
         # Check if there are any vulnerabilities
         search_pattern='vulnerabilities │    0C     0H     0M     0L'

@@ -51,7 +51,7 @@ jobs:
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
           goodwithtech/dockle:latest -f sarif -o dockle_results.sarif ${{ env.REPO_NAME }}:latest
 
-          - name: Run Dockle to scan the Docker image
-          run: |
-            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-              goodwithtech/dockle:latest -f json -o dockle_results.json ${{ env.REPO_NAME }}:latest
+    - name: Run Dockle to scan the Docker image
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          goodwithtech/dockle:latest -f json -o dockle_results.json ${{ env.REPO_NAME }}:latest

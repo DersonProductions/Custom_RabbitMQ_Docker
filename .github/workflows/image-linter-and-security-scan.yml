@@ -20,7 +20,11 @@ jobs:
       shell: bash
       run: |
         echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-        echo "TAG=${{github.head_ref}}" >> $GITHUB_ENV
+        if [ -z "${{ github.head_ref }}" ]; then
+          echo "TAG=${{ github.ref }}" >> $GITHUB_ENV
+        else
+          echo "TAG=${{ github.head_ref }}" >> $GITHUB_ENV
+        fi
         # Set up Docker Content Trust
         # Dockel has issues with this enabled since it is not signed
         # echo "export DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV

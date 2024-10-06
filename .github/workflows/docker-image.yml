@@ -38,7 +38,7 @@ jobs:
       packages: read
     steps:
       - name: scan_and_lint
-        uses: DersonProductions/Custom_RabbitMQ_Docker/actions/workflows/image-linter-and-security-scan.yml
+        uses: DersonProductions/Custom_RabbitMQ_Docker/actions/workflows/image-linter-and-security-scan.yml@${{github.base_ref}}
       - name: failure check
         if: failure() || cancelled()
         shell: bash

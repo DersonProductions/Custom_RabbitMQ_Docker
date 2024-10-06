@@ -46,12 +46,14 @@ jobs:
         docker build . --file Dockerfile --tag ${{ env.REPO_NAME }}:latest
         docker images
 
-    - name: Run Dockle to scan the Docker image
+    - name: Run Dockle to scan the Docker image to sarif output
       run: |
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
           goodwithtech/dockle:latest -f sarif -o dockle_results.sarif ${{ env.REPO_NAME }}:latest
+        cat dockle_results.sarif
 
-    - name: Run Dockle to scan the Docker image
+    - name: Run Dockle to scan the Docker image to json output
       run: |
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
           goodwithtech/dockle:latest -f json -o dockle_results.json ${{ env.REPO_NAME }}:latest
+        cat dockle_results.json

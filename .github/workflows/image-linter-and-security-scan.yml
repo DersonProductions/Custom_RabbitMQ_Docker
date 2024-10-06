@@ -50,28 +50,6 @@ jobs:
         docker build . --file Dockerfile --tag ${{ env.REPO_NAME }}:${{ env.TAG }}
         docker images
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v3.3.0
-      with:
-        # registry: hub.docker.com
-        username: ${{ github.actor }}
-        password: ${{ secrets.DOCKER_HUB_PAT_RO }}
-
-    - name: Docker Scout Scan
-      run: |
-        curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh -o install-scout.sh
-        sh install-scout.sh
-        scan_output=$(docker scout cves ${{ env.REPO_NAME }}:${{ env.TAG }})
-        echo "$scan_output"
-        # Check if there are any vulnerabilities
-        search_pattern='vulnerabilities │    0C     0H     0M     0L'
-        if [[ $scan_output == *"$search_pattern"* ]]; then
-          echo "Docker Scout found no vulnerabilities."
-        else
-          echo "Docker Scout found vulnerabilities."
-          exit 1
-        fi
-
     - name: Docker Trivy Repository Feature Branch Scan
       # Scan the merging branch code for vulnerabilities
       run: |

@@ -20,9 +20,9 @@ jobs:
       shell: bash
       run: |
         echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-        echo "TAG=security_scan" >> $GITHUB_ENV
+        echo "TAG=${{github.head_ref}}" >> $GITHUB_ENV
         # Set up Docker Content Trust
-        # Dockel has issues with this enabled
+        # Dockel has issues with this enabled since it is not signed
         # echo "export DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV
     
     - name: Checkout repository
@@ -53,10 +53,6 @@ jobs:
     - name: Docker Trivy Repository Feature Branch Scan
       # Scan the merging branch code for vulnerabilities
       run: |
-        echo "github.repository: ${{ github.repository }}/${{ github.base_ref }}"
-        echo "github.ref: ${{ github.ref }}"
-        echo "github.head_ref: ${{ github.head_ref }}"
-        echo "github.server_url: ${{ github.server_url }}"
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
           aquasec/trivy:latest \
           --debug \
@@ -79,7 +75,9 @@ jobs:
         # Grep should come back as 1 if there are no vulnerabilities and 0 if there are vulnerabilities
         if [ $(grep -c 'Total: 0 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)' trivy-scan-${{ github.head_ref }}.txt) -eq 0 ]; then
           echo "Trivy Scan found vulnerabilities. Please review the trivy-scan-${{ github.head_ref }}.txt file."
-          exit 1
+          exit 1;
+        else
+          echo "Trivy Scan found no vulnerabilities."
         fi
 
     # Below are doing the same thing, but one is outputting to sarif and the other to json
@@ -109,11 +107,15 @@ jobs:
       run: |
         if [ $(grep -c '"level": "error"' dockle.sarif) -gt 0 ]; then
           echo "Dockle Scan found a error message. Please review the dockle.sarif file."
-          exit 1
+          exit 1;
+        else
+          echo "Dockle Scan found no error messages."
         fi
         if [ $(grep -c '"level": "warning"' dockle.sarif) -gt 0 ]; then
           echo "Dockle Scan found a warning message. Please review the dockle.sarif file."
-          exit 1
+          exit 1;
+        else
+          echo "Dockle Scan found no warning messages."
         fi
 
     - name: Run Dockle to scan the Docker image to json output
@@ -127,7 +129,7 @@ jobs:
           --accept-key SERVICE_ACCOUNT_PASSWORD \
           --accept-key RABBIT_MQ_USER_PASSWORD \
           --accept-key RABBITMQ_PGP_KEY_ID \
-          --format json --output dockle.json \
+          --format json --output /mnt/dockle.json \
           ${{ env.REPO_NAME }}:${{ env.TAG }}
           # Copy the json file to the GitHub Actions workspace
           cp /tmp/dockle.json .
@@ -147,9 +149,13 @@ jobs:
         pass=$(jq '.summary.pass' dockle.json)
         if [ $fatal -gt 0 ]; then
           echo "Dockle Scan found fatal vulnerabilities. Please review the dockle.json file."
-          exit 1
+          exit 1;
+        else
+          echo "Dockle Scan found no fatal vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}"
         fi
         if [ $warn -gt 0 ]; then
           echo "Dockle Scan found warning vulnerabilities. Please review the dockle.json file."
-          exit 1
+          exit 1;
+        else
+          echo "Dockle Scan found no warning vulnerabilities."
         fi

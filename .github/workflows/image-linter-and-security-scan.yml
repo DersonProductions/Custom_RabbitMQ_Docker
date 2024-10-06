@@ -53,6 +53,7 @@ jobs:
 
     - name: Docker Scout Scan
       run: |
+        curl -sSL -tlsv1.3 https://get.docker.com/ | sh
         sudo apt-get install docker-scout -y
         scan_output=$(docker scout cves ${{ env.REPO_NAME }}:${{ env.TAG }})
         echo "$scan_output"

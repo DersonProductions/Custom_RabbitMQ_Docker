@@ -1,0 +1,57 @@
+name: Docker Image Linter and Security Scan
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  # push:
+  #   branches:
+  #     - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+    name: Run Dockle for Docker Image Security Scan
+
+    steps:
+    - name: Setup Environment Variables
+      shell: bash
+      run: |
+        echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+    
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.0
+      # https://github.com/actions/checkout
+      with:  
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        ssh-strict: true
+        ssh-user: git
+        persist-credentials: false
+        fetch-depth: 1
+        fetch-tags: true
+        show-progress: true
+        github-server-url: https://github.com
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3.7.1
+      # https://github.com/docker/setup-buildx-action
+      with:
+          buildkitd-flags: --debug
+
+    - name: Build Docker Image
+      run: |
+      docker build . --file Dockerfile --tag ghcr.io/${{ env.REPO_NAME }}:latest
+        docker images
+
+    - name: Run Dockle to scan the Docker image
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          goodwithtech/dockle:latest --output-type sarif --output /dockle-output/dockle.sarif ${{ env.REPO_NAME }}:latest
+
+          - name: Run Dockle to scan the Docker image
+          run: |
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              goodwithtech/dockle:latest --output-type json --output /dockle-output/dockle.json ${{ env.REPO_NAME }}:latest

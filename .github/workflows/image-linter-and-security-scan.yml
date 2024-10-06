@@ -24,7 +24,7 @@ jobs:
         # Set up Docker Content Trust
         # Dockel has issues with this enabled
         # echo "export DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV
-        apt-get install jq -y
+        man jq
     
     - name: Checkout repository
       uses: actions/checkout@v4.2.0

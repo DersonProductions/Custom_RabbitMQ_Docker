@@ -21,7 +21,7 @@ jobs:
       run: |
         echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         if [ -z "${{ github.head_ref }}" ]; then
-          echo "TAG=${{ github.ref }}" >> $GITHUB_ENV
+          echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
         else
           echo "TAG=${{ github.head_ref }}" >> $GITHUB_ENV
         fi

@@ -71,14 +71,14 @@ jobs:
           --debug \
           --exit-code 1 \
           image ${{ env.REPO_NAME }}:${{ env.TAG }} \
-          > trivy-scan-${{ github.repository }}-${{ github.base_ref }}.txt
-          cat trivy-scan-${{ github.repository }}-${{ github.base_ref }}.txt
+          > trivy-scan-${{ github.head_ref }}.txt
+          cat trivy-scan-${{ github.head_ref }}.txt
     
     - name: Confirm there are no vulnerabilities in Trivy scan
       run: |
         # Grep should come back as 1 if there are no vulnerabilities and 0 if there are vulnerabilities
-        if [ $(grep -c 'Total: 0 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)' trivy-scan-${{ github.repository }}-${{ github.base_ref }}.txt) -eq 0 ]; then
-          echo "Trivy Scan found vulnerabilities. Please review the trivy-scan-${{ github.repository }}-${{ github.base_ref }}.txt file."
+        if [ $(grep -c 'Total: 0 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)' trivy-scan--${{ github.head_ref }}.txt) -eq 0 ]; then
+          echo "Trivy Scan found vulnerabilities. Please review the trivy-scan-${{ github.head_ref }}.txt file."
           exit 1
         fi
 

@@ -33,7 +33,7 @@ jobs:
           show-progress: true
           github-server-url: https://github.com
       - name: scan_and_lint
-        uses: DersonProductions/Custom_RabbitMQ_Docker/actions/workflows/docker-image.yml
+        uses: .github/workflows/image-linter-and-security-scan.yml
       - name: failure check
         if: failure() || cancelled()
         shell: bash

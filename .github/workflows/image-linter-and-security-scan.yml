@@ -53,8 +53,7 @@ jobs:
     - name: Docker Scout Scan
       run: |
         # Ensure Docker Scan is enabled
-        docker scan --version
-        scan_output=$(docker scan ${{ env.REPO_NAME }}:${{ env.TAG }} --json)
+        scan_output=$(docker scan ${{ env.REPO_NAME }}:${{ env.TAG }} --debug)
         echo "$scan_output"
         # Check if there are any vulnerabilities
         search_pattern='vulnerabilities │    0C     0H     0M     0L'

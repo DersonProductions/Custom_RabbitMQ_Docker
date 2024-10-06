@@ -1,0 +1,161 @@
+name: Docker Image Linter and Security Scan
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  # push:
+  #   branches:
+  #     - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+    name: Run Dockle for Docker Image Security Scan
+
+    steps:
+    - name: Setup Environment Variables
+      shell: bash
+      run: |
+        echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "TAG=${{github.head_ref}}" >> $GITHUB_ENV
+        # Set up Docker Content Trust
+        # Dockel has issues with this enabled since it is not signed
+        # echo "export DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV
+    
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.0
+      # https://github.com/actions/checkout
+      with:  
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        ssh-strict: true
+        ssh-user: git
+        persist-credentials: false
+        fetch-depth: 1
+        fetch-tags: true
+        show-progress: true
+        github-server-url: https://github.com
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3.7.1
+      # https://github.com/docker/setup-buildx-action
+      with:
+          buildkitd-flags: --debug
+
+    - name: Build Docker Image
+      run: |
+        docker build . --file Dockerfile --tag ${{ env.REPO_NAME }}:${{ env.TAG }}
+        docker images
+
+    - name: Docker Trivy Repository Feature Branch Scan
+      # Scan the merging branch code for vulnerabilities
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          aquasec/trivy:latest \
+          --debug \
+          --exit-code 1 \
+          repository ${{ github.server_url}}/${{ github.repository }}
+
+    - name: Docker Trivy Docker Image Scan
+      # Scan the Docker image for vulnerabilities
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          aquasec/trivy:latest \
+          --debug \
+          --exit-code 1 \
+          image ${{ env.REPO_NAME }}:${{ env.TAG }} \
+          > trivy-scan-${{ github.head_ref }}.txt
+          cat trivy-scan-${{ github.head_ref }}.txt
+    
+    - name: Confirm there are no vulnerabilities in Trivy scan
+      run: |
+        # Grep should come back as 1 if there are no vulnerabilities and 0 if there are vulnerabilities
+        if [ $(grep -c 'Total: 0 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)' trivy-scan-${{ github.head_ref }}.txt) -eq 0 ]; then
+          echo "Trivy Scan found vulnerabilities for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the trivy-scan-${{ github.head_ref }}.txt file."
+          exit 1;
+        else
+          echo "Trivy Scan found no vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}."
+        fi
+
+    # Below are doing the same thing, but one is outputting to sarif and the other to json
+    # Wanted to see what both do.
+    - name: Run Dockle to scan the Docker image to sarif output
+      run: |
+        # Scan the Docker image for vulnerabilities using Dockle
+        # -v Mounts the /tmp directory to the /mnt directory in the container so that the output file can be saved to the /mnt directory
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v /tmp:/mnt \
+          goodwithtech/dockle:latest \
+          --debug \
+          --accept-key SERVICE_ACCOUNT_PASSWORD \
+          --accept-key RABBIT_MQ_USER_PASSWORD \
+          --accept-key RABBITMQ_PGP_KEY_ID \
+          --format sarif --output /mnt/dockle.sarif \
+          ${{ env.REPO_NAME }}:${{ env.TAG }}
+        # Copy the sarif file to the GitHub Actions workspace
+        cp /tmp/dockle.sarif .
+        # Remove the sarif file from the /tmp directory
+        # rm /tmp/dockle.sarif
+        # Display the contents of the sarif file
+        cat dockle.sarif
+
+    - name: Confirm there are no vulnerabilities in Dockle Sarif scan
+      shell: bash
+      run: |
+        if [ $(grep -c '"level": "error"' dockle.sarif) -gt 0 ]; then
+          echo "Dockle Scan found a error message for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.sarif file."
+          exit 1;
+        else
+          echo "Dockle Scan found no error messages in ${{ env.REPO_NAME }}:${{ env.TAG }}"
+        fi
+        if [ $(grep -c '"level": "warning"' dockle.sarif) -gt 0 ]; then
+          echo "Dockle Scan found a warning message for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.sarif file."
+          exit 1;
+        else
+          echo "Dockle Scan found no warning messages in ${{ env.REPO_NAME }}:${{ env.TAG }}"
+        fi
+
+    - name: Run Dockle to scan the Docker image to json output
+      run: |
+        # Scan the Docker image for vulnerabilities using Dockle
+        # -v Mounts the /tmp directory to the /mnt directory in the container so that the output file can be saved to the /mnt directory
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v /tmp:/mnt \
+          goodwithtech/dockle:latest \
+          --debug \
+          --accept-key SERVICE_ACCOUNT_PASSWORD \
+          --accept-key RABBIT_MQ_USER_PASSWORD \
+          --accept-key RABBITMQ_PGP_KEY_ID \
+          --format json --output /mnt/dockle.json \
+          ${{ env.REPO_NAME }}:${{ env.TAG }}
+          # Copy the json file to the GitHub Actions workspace
+          cp /tmp/dockle.json .
+          # Remove the json file from the /tmp directory
+          # rm /tmp/dockle.json
+          # Display the contents of the json file
+          cat dockle.json
+
+    - name: Confirm there are no vulnerabilities in Dockle JSON scan
+      shell: bash
+      run: |
+        # Check if there are any vulnerabilities
+        fatal=$(jq '.summary.fatal' dockle.json)
+        warn=$(jq '.summary.warn' dockle.json)
+        info=$(jq '.summary.info' dockle.json)
+        skip=$(jq '.summary.skip' dockle.json)
+        pass=$(jq '.summary.pass' dockle.json)
+        if [ $fatal -gt 0 ]; then
+          echo "Dockle Scan found fatal vulnerabilities for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.json file."
+          exit 1;
+        else
+          echo "Dockle Scan found no fatal vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}"
+        fi
+        if [ $warn -gt 0 ]; then
+          echo "Dockle Scan found warning vulnerabilities for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.json file."
+          exit 1;
+        else
+          echo "Dockle Scan found no warning vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}"
+        fi

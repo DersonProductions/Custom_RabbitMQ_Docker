@@ -39,7 +39,7 @@ jobs:
           echo "PWD Path: $PWD"
           echo " Full path to image-linter-and-security-scan.yml is: $(find $PWD -name image-linter-and-security-scan.yml)"
       - name: scan_and_lint
-        uses: ./.github/workflows/image-linter-and-security-scan.yml
+        uses: ./home/runner/work/Custom_RabbitMQ_Docker/Custom_RabbitMQ_Docker/.github/workflows/image-linter-and-security-scan.yml
       - name: failure check
         if: failure() || cancelled()
         shell: bash

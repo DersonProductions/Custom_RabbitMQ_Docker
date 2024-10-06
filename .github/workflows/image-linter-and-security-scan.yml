@@ -24,7 +24,6 @@ jobs:
         # Set up Docker Content Trust
         # Dockel has issues with this enabled
         # echo "export DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV
-        man jq
     
     - name: Checkout repository
       uses: actions/checkout@v4.2.0
@@ -53,7 +52,10 @@ jobs:
 
     - name: Docker Scout Scan
       run: |
-        curl -sSL -tlsv1.3 https://get.docker.com/ | sh
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         sudo apt-get install docker-scout -y
         scan_output=$(docker scout cves ${{ env.REPO_NAME }}:${{ env.TAG }})
         echo "$scan_output"
@@ -151,8 +153,6 @@ jobs:
     - name: Confirm there are no vulnerabilities in Dockle JSON scan
       shell: bash
       run: |
-        # install jq
-        apt-get install -y jq
         # Check if there are any vulnerabilities
         fatal=$(jq '.summary.fatal' dockle.json)
         warn=$(jq '.summary.warn' dockle.json)

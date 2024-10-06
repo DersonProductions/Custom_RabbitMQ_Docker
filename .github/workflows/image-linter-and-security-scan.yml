@@ -55,11 +55,12 @@ jobs:
       run: |
         echo "github.repository: ${{ github.repository }}/${{ github.base_ref }}"
         echo "github.ref: ${{ github.ref }}"
+        echo "github.head_ref: ${{ github.head_ref }}"
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
           aquasec/trivy:latest \
           --debug \
           --exit-code 1 \
-          repository ${{ github.repository }}/${{ github.base_ref }} \
+          repository ${{ github.repository }}/${{ github.head_ref }}
 
     - name: Docker Trivy Docker Image Scan
       # Scan the Docker image for vulnerabilities

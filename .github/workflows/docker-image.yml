@@ -26,7 +26,11 @@ jobs:
           fetch-tags: true
           show-progress: true
           github-server-url: https://github.com
+
   scan_and_lint:
+    needs: [
+      checkout_repo
+    ]
     name: Scan and Lint Docker Image
     runs-on: ubuntu-latest
     permissions:

@@ -74,10 +74,10 @@ jobs:
       run: |
         # Grep should come back as 1 if there are no vulnerabilities and 0 if there are vulnerabilities
         if [ $(grep -c 'Total: 0 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)' trivy-scan-${{ github.head_ref }}.txt) -eq 0 ]; then
-          echo "Trivy Scan found vulnerabilities. Please review the trivy-scan-${{ github.head_ref }}.txt file."
+          echo "Trivy Scan found vulnerabilities for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the trivy-scan-${{ github.head_ref }}.txt file."
           exit 1;
         else
-          echo "Trivy Scan found no vulnerabilities."
+          echo "Trivy Scan found no vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}."
         fi
 
     # Below are doing the same thing, but one is outputting to sarif and the other to json
@@ -106,16 +106,16 @@ jobs:
       shell: bash
       run: |
         if [ $(grep -c '"level": "error"' dockle.sarif) -gt 0 ]; then
-          echo "Dockle Scan found a error message. Please review the dockle.sarif file."
+          echo "Dockle Scan found a error message for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.sarif file."
           exit 1;
         else
-          echo "Dockle Scan found no error messages."
+          echo "Dockle Scan found no error messages in ${{ env.REPO_NAME }}:${{ env.TAG }}"
         fi
         if [ $(grep -c '"level": "warning"' dockle.sarif) -gt 0 ]; then
-          echo "Dockle Scan found a warning message. Please review the dockle.sarif file."
+          echo "Dockle Scan found a warning message for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.sarif file."
           exit 1;
         else
-          echo "Dockle Scan found no warning messages."
+          echo "Dockle Scan found no warning messages in ${{ env.REPO_NAME }}:${{ env.TAG }}"
         fi
 
     - name: Run Dockle to scan the Docker image to json output
@@ -148,14 +148,14 @@ jobs:
         skip=$(jq '.summary.skip' dockle.json)
         pass=$(jq '.summary.pass' dockle.json)
         if [ $fatal -gt 0 ]; then
-          echo "Dockle Scan found fatal vulnerabilities. Please review the dockle.json file."
+          echo "Dockle Scan found fatal vulnerabilities for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.json file."
           exit 1;
         else
           echo "Dockle Scan found no fatal vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}"
         fi
         if [ $warn -gt 0 ]; then
-          echo "Dockle Scan found warning vulnerabilities. Please review the dockle.json file."
+          echo "Dockle Scan found warning vulnerabilities for ${{ env.REPO_NAME }}:${{ env.TAG }}. Please review the dockle.json file."
           exit 1;
         else
-          echo "Dockle Scan found no warning vulnerabilities."
+          echo "Dockle Scan found no warning vulnerabilities in ${{ env.REPO_NAME }}:${{ env.TAG }}"
         fi

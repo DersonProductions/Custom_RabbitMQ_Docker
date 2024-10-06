@@ -11,12 +11,13 @@ on:
     tags:
           - 'v*'  # Matches any version tag starting with 'v'
 
-jobs:
-  checkout_repo:
-    name: Checkout Repository
+jobs:      
+  scan_and_lint:
+    name: Scan and Lint Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     steps:
       - name: Checkout Repository Code
         uses: actions/checkout@v4.2.0
@@ -31,19 +32,8 @@ jobs:
           fetch-tags: true
           show-progress: true
           github-server-url: https://github.com
-
-  scan_and_lint:
-    needs: [
-      checkout_repo
-    ]
-    name: Scan and Lint Docker Image
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-    steps:
       - name: scan_and_lint
-        uses: DersonProductions/Custom_RabbitMQ_Docker/actions/workflows/image-linter-and-security-scan.yml@main
+        uses: ./.github/workflows/image-linter-and-security-scan.yml
       - name: failure check
         if: failure() || cancelled()
         shell: bash
@@ -60,6 +50,19 @@ jobs:
         scan_and_lint
       ]
     steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4.2.0
+      # https://github.com/actions/checkout
+      with:  
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        ssh-strict: true
+        ssh-user: git
+        persist-credentials: false
+        fetch-depth: 1
+        fetch-tags: true
+        show-progress: true
+        github-server-url: https://github.com
     - name: Setup Environment Variables
       shell: bash
       run: |

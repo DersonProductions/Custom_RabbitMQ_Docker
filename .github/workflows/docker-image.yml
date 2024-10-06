@@ -15,37 +15,6 @@ jobs:
   scan_and_lint:
     name: Scan and Lint Docker Image
     uses: ./.github/workflows/image-linter-and-security-scan.yml
-    # permissions:
-    #   contents: read
-    #   packages: read
-    #   actions: write
-
-    # steps:
-    #   - name: Checkout Repository Code
-    #     uses: actions/checkout@v4
-    #     # https://github.com/actions/checkout
-    #     # with:  
-    #     #   repository: ${{ github.repository }}
-    #       # ref: ${{ github.ref }}
-    #       # ssh-strict: true
-    #       # ssh-user: git
-    #       # persist-credentials: false
-    #       # fetch-depth: 0
-    #       # fetch-tags: true
-    #       # show-progress: true
-    #       # github-server-url: https://github.com
-    #   - name: find path to workflow
-    #     run: |
-    #       echo "Workflow Path: $GITHUB_WORKFLOW"
-    #       echo "PWD Path: $PWD"
-    #       echo " Full path to image-linter-and-security-scan.yml is: $(find $PWD -name image-linter-and-security-scan.yml)"
-    #   - name: scan_and_lint
-    #     uses: ./home/runner/work/Custom_RabbitMQ_Docker/Custom_RabbitMQ_Docker/.github/workflows/image-linter-and-security-scan.yml
-    #   - name: failure check
-    #     if: failure() || cancelled()
-    #     shell: bash
-    #     run: |
-    #       exit 1
 
   build:
     name: Build and Push Docker Image
@@ -75,10 +44,10 @@ jobs:
       run: |
         echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         # if env.tag is defined, use it, otherwise use the tag from the event
-        if [ -z "${{ env.tag }}" ]; then
+        if [ -z "${{ inputs.tag }}" ]; then
           echo "TAG=$(echo ${{ github.ref }} | sed -n 's/refs\/tags\/v//p')" >> $GITHUB_ENV
         else
-          echo "TAG=${{ env.tag }}" >> $GITHUB_ENV
+          echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
         fi
     
     - name: Set up Docker Buildx

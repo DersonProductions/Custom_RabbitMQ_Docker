@@ -35,7 +35,7 @@ jobs:
       - name: ls
         run: ls -alR
       - name: scan_and_lint
-        uses: ./.github/workflows/image-linter-and-security-scan.yml
+        uses: ${{github.action_path}}./.github/workflows/image-linter-and-security-scan.yml
       - name: failure check
         if: failure() || cancelled()
         shell: bash

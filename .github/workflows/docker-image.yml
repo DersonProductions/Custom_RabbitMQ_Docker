@@ -32,6 +32,8 @@ jobs:
           fetch-tags: true
           show-progress: true
           github-server-url: https://github.com
+      - name: ls
+        run: ls -alR
       - name: scan_and_lint
         uses: ./.github/workflows/image-linter-and-security-scan.yml
       - name: failure check

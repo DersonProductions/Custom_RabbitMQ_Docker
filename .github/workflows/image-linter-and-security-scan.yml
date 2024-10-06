@@ -24,6 +24,8 @@ jobs:
         # Set up Docker Content Trust
         # Dockel has issues with this enabled
         # echo "export DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV
+        apt-get update
+        apt-get upgrade -y
     
     - name: Checkout repository
       uses: actions/checkout@v4.2.0
@@ -52,8 +54,8 @@ jobs:
 
     - name: Docker Scout Scan
       run: |
-        # Ensure Docker Scan is enabled
-        scan_output=$(docker scan ${{ env.REPO_NAME }}:${{ env.TAG }} --debug)
+        sudo apt-get install docker-scout -y
+        scan_output=$(docker scout cves ${{ env.REPO_NAME }}:${{ env.TAG }})
         echo "$scan_output"
         # Check if there are any vulnerabilities
         search_pattern='vulnerabilities │    0C     0H     0M     0L'
@@ -150,7 +152,6 @@ jobs:
       shell: bash
       run: |
         # install jq
-        apt-get update
         apt-get install -y jq
         # Check if there are any vulnerabilities
         fatal=$(jq '.summary.fatal' dockle.json)

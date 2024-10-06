@@ -100,7 +100,7 @@ jobs:
         # Copy the sarif file to the GitHub Actions workspace
         cp /tmp/dockle.sarif .
         # Remove the sarif file from the /tmp directory
-        rm /tmp/dockle.sarif
+        # rm /tmp/dockle.sarif
         # Display the contents of the sarif file
         cat dockle.sarif
 
@@ -132,7 +132,7 @@ jobs:
           # Copy the json file to the GitHub Actions workspace
           cp /tmp/dockle.json .
           # Remove the json file from the /tmp directory
-          rm /tmp/dockle.json
+          # rm /tmp/dockle.json
           # Display the contents of the json file
           cat dockle.json
 

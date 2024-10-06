@@ -20,10 +20,10 @@ jobs:
     #   packages: read
     steps:
       - name: Checkout Repository Code
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4
         # https://github.com/actions/checkout
-        with:  
-          repository: ${{ github.repository }}
+        # with:  
+        #   repository: ${{ github.repository }}
           # ref: ${{ github.ref }}
           # ssh-strict: true
           # ssh-user: git

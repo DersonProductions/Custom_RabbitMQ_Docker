@@ -61,7 +61,7 @@ jobs:
           aquasec/trivy:latest \
           --debug \
           --exit-code 1 \
-          repository ${{ github.server_url}}/${{ github.repository }}/${{ github.head_ref }}
+          repository ${{ github.server_url}}/${{ github.repository }}/tree/${{ github.head_ref }}
 
     - name: Docker Trivy Docker Image Scan
       # Scan the Docker image for vulnerabilities

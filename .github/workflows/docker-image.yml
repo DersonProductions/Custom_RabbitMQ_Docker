@@ -7,6 +7,20 @@ on:
           - 'v*'  # Matches any version tag starting with 'v'
 
 jobs:
+  scan_and_lint:
+    name: Scan and Lint Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: scan_and_lint
+        uses: ./.github/workflows/image-linter-and-security-scan.yml
+      - name: failure check
+        if: failure() || cancelled()
+        shell: bash
+        run: |
+          exit 1
 
   build:
     name: Build and Push Docker Image
@@ -14,6 +28,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    needs: [
+        scan_and_lint
+      ]
     steps:
     - name: Setup Environment Variables
       shell: bash

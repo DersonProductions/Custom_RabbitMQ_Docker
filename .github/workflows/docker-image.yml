@@ -15,9 +15,9 @@ jobs:
   scan_and_lint:
     name: Scan and Lint Docker Image
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
+    # permissions:
+    #   contents: read
+    #   packages: read
     steps:
       - name: Checkout Repository Code
         uses: actions/checkout@v4.2.0
@@ -28,7 +28,7 @@ jobs:
           ssh-strict: true
           ssh-user: git
           persist-credentials: false
-          fetch-depth: 1
+          fetch-depth: 0
           fetch-tags: true
           show-progress: true
           github-server-url: https://github.com

@@ -15,9 +15,10 @@ jobs:
   scan_and_lint:
     name: Scan and Lint Docker Image
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: read
-    #   packages: read
+    permissions:
+      contents: read
+      packages: read
+      actions: write
     steps:
       - name: Checkout Repository Code
         uses: actions/checkout@v4

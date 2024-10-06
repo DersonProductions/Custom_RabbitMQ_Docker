@@ -33,6 +33,11 @@ jobs:
           # fetch-tags: true
           # show-progress: true
           # github-server-url: https://github.com
+      - name: find path to workflow
+        run: |
+          echo "Workflow Path: $GITHUB_WORKFLOW"
+          echo "PWD Path: $PWD"
+          echo " Full path to image-linter-and-security-scan.yml is: $(find $PWD -name image-linter-and-security-scan.yml)"
       - name: scan_and_lint
         uses: ./.github/workflows/image-linter-and-security-scan.yml
       - name: failure check
